@@ -22,6 +22,13 @@ class ReportController
     {
         $adminUserId = $request->getHeader('admin_user_id')[0];
         
+        
+        $queryParams = $request->getQueryParams();
+        $status = $queryParams['status'] ?? null; // Ex: 1 (ativo), 0 (inativo)
+        $categoryId = $queryParams['category_id'] ?? null; // Ex: ID da categoria
+        $orderBy = $queryParams['order_by'] ?? 'created_at'; // Ordenação padrão por data
+
+
         $data = [];
         $data[] = [
             'Id do produto',
@@ -33,7 +40,10 @@ class ReportController
             'Logs de Alterações'
         ];
         
-        $stm = $this->productService->getAll($adminUserId);
+
+
+        $stm = $this->productService->getAll($adminUserId, $status, $categoryId, $orderBy);        
+        // $stm = $this->productService->getAll($adminUserId);
         $products = $stm->fetchAll();
        
         foreach ($products as $i => $product) {
@@ -64,7 +74,7 @@ class ReportController
         
        
 
-        // Gerar o HTML da tabela
+        // Gerando a tabela em html 
         $report = "<table style='font-size: 10px;'>";
         foreach ($data as $row) {
             $report .= "<tr>";

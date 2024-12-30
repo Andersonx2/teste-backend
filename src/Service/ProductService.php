@@ -12,7 +12,7 @@ class ProductService
         $this->pdo = DB::connect(); 
     }
 
-    public function getAll($adminUserId)
+    public function getAll($adminUserId, $status = null, $categoryId = null, $orderBy = 'created_at')
     {
         $query = "
             SELECT 
@@ -30,17 +30,36 @@ class ProductService
                 product_category pc ON p.id = pc.product_id
             JOIN 
                 category c ON pc.cat_id = c.id
-        ";    
+            WHERE 
+                1 = 1 -- Sempre verdadeiro, facilita a concatenação de condições
+        ";
+    
+        // Adicionar filtros dinamicamente
+        if ($status !== null) {
+            $query .= " AND p.active = :status";
+        }
+        if ($categoryId !== null) {
+            $query .= " AND c.id = :categoryId";
+        }
+    
+        // Adicionar ordenação
+        $query .= " ORDER BY " . $orderBy;
     
         $stm = $this->pdo->prepare($query);
-        
+    
+        // Bind dos parâmetros
+        if ($status !== null) {
+            $stm->bindValue(':status', $status, \PDO::PARAM_INT);
+        }
+        if ($categoryId !== null) {
+            $stm->bindValue(':categoryId', $categoryId, \PDO::PARAM_INT);
+        }        
     
         $stm->execute();
-   
+    
         return $stm;
-
-   
     }
+    
     
 
     

@@ -56,8 +56,10 @@ Abaixo, as solicitações do cliente:
 
   ### Filtros e Ordenamento
     Para a listagem de produtos:
-    - [ ] Gostaria de poder filtrar os produtos ativos e inativos;
+    - [x] Gostaria de poder filtrar os produtos ativos e inativos;
+        http://localhost:8000/report?status=0
     - [ ] Gostaria de poder filtrar os produtos por categoria;
+    
     - [ ] Gostaria de poder ordenar os produtos por data de cadastro.
 
   ### Relatório
