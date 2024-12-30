@@ -12,7 +12,8 @@ class ProductService
         $this->pdo = DB::connect(); 
     }
 
-    public function getAll($adminUserId, $status = null, $categoryId = null, $orderBy = 'created_at')
+
+    public function getAll($adminUserId, $status = null, $categoryTitle = null, $orderBy = 'created_at') 
     {
         $query = "
             SELECT 
@@ -30,40 +31,41 @@ class ProductService
                 product_category pc ON p.id = pc.product_id
             JOIN 
                 category c ON pc.cat_id = c.id
-            WHERE 
-                1 = 1 -- Sempre verdadeiro, facilita a concatenação de condições
-        ";
-    
-        // Adicionar filtros dinamicamente
+        ";    
+
+        $conditions = [];
+        $parameters = [];
+        
+        //Filtro de Status
         if ($status !== null) {
-            $query .= " AND p.active = :status";
+            $conditions[] = "p.active = :status";
+            $parameters[':status'] = $status;
         }
-        if ($categoryId !== null) {
-            $query .= " AND c.id = :categoryId";
+        //Filtro de cagtegoria
+        if ($categoryTitle !== null) {
+            $conditions[] = "c.title = :categoryTitle";
+            $parameters[':categoryTitle'] = $categoryTitle;
+        }
+        
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(" AND ", $conditions);
         }
     
-        // Adicionar ordenação
-        $query .= " ORDER BY " . $orderBy;
-    
-        $stm = $this->pdo->prepare($query);
-    
-        // Bind dos parâmetros
-        if ($status !== null) {
-            $stm->bindValue(':status', $status, \PDO::PARAM_INT);
-        }
-        if ($categoryId !== null) {
-            $stm->bindValue(':categoryId', $categoryId, \PDO::PARAM_INT);
-        }        
-    
-        $stm->execute();
-    
-        return $stm;
+    //Ordenação
+            $query .= " ORDER BY " . $orderBy;
+
+    $stm = $this->pdo->prepare($query);
+        foreach ($parameters as $param => $value) {
+        $stm->bindValue($param, $value);
     }
     
+    $stm->execute();
     
-
+    return $stm;
+}
     
-    public function getOne($id)
+  
+  public function getOne($id)
     {
         // Prepara a consulta SQL para obter as informações do produto e suas categorias relacionadas
         $stm = $this->pdo->prepare("
@@ -84,7 +86,29 @@ class ProductService
             WHERE 
                 p.id = :id
         ");   
-        $stm->bindParam(':id', $id, \PDO::PARAM_INT);
+
+        //Ordenacao dos produtos
+        $query .= " ORDER BY " . $orderBy;
+
+        //Filtro status
+        if ($status !== null) {
+            $query .= " AND p.active = :status";
+        }
+        //Filtro nome Categoria 
+        if ($categoryTitle !== null) {
+            $query .= " AND c.title = :categoryTitle";
+        }
+
+
+   // Bind dos parâmetros
+            if ($status !== null) {
+                $stm->bindValue(':status', $status, \PDO::PARAM_INT);
+            }
+            if ($categoryTitle !== null) {
+                $stm->bindValue(':categoryTitle', $categoryTitle, \PDO::PARAM_STR);
+            }
+
+            $stm->bindParam(':id', $id, \PDO::PARAM_INT);
         
         $stm->execute();
 

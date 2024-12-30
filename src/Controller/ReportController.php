@@ -22,12 +22,10 @@ class ReportController
     {
         $adminUserId = $request->getHeader('admin_user_id')[0];
         
-        
         $queryParams = $request->getQueryParams();
-        $status = $queryParams['status'] ?? null; // Ex: 1 (ativo), 0 (inativo)
-        $categoryId = $queryParams['category_id'] ?? null; // Ex: ID da categoria
-        $orderBy = $queryParams['order_by'] ?? 'created_at'; // Ordenação padrão por data
-
+        $status = $queryParams['status'] ?? null;
+        $categoryTitle = $queryParams['categoryId'] ?? null;
+        $orderBy = $queryParams['order_by'] ?? 'created_at';
 
         $data = [];
         $data[] = [
@@ -42,10 +40,10 @@ class ReportController
         
 
 
-        $stm = $this->productService->getAll($adminUserId, $status, $categoryId, $orderBy);        
-        // $stm = $this->productService->getAll($adminUserId);
-        $products = $stm->fetchAll();
-       
+    $stm = $this->productService->getAll($adminUserId, $status, $categoryTitle, $orderBy);
+    $products = $stm->fetchAll();       
+
+    
         foreach ($products as $i => $product) {
             $companyName = '';
             if (isset($product->company_id)) {
@@ -56,6 +54,7 @@ class ReportController
                 }
             }
         
+
             $productLogs = [];
             if (isset($product->product_id)) {
                 $stm = $this->productService->getLog($product->product_id);
