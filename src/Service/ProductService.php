@@ -18,6 +18,7 @@ class ProductService
             SELECT 
                 p.id AS product_id, 
                 p.title, 
+                p.company_id,
                 p.price, 
                 p.active, 
                 p.created_at, 
@@ -29,20 +30,18 @@ class ProductService
                 product_category pc ON p.id = pc.product_id
             JOIN 
                 category c ON pc.cat_id = c.id
-        ";
+        ";    
     
         $stm = $this->pdo->prepare($query);
         
-        // Removido o bindParam pois não há mais a necessidade de passar o adminUserId para a consulta
     
         $stm->execute();
-    
+   
         return $stm;
+
+   
     }
     
-
-
-
 
     
     public function getOne($id)

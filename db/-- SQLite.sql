@@ -108,3 +108,24 @@ JOIN
     product_category pc ON p.id = pc.product_id
 JOIN 
     category c ON pc.cat_id = c.id;
+
+
+
+SELECT * FROM company;
+
+
+SELECT 
+    p.id AS product_id, 
+    p.company_id, 
+    p.title, 
+    p.price, 
+    p.active, 
+    p.created_at, 
+    c.id AS category_id, 
+    c.title AS category_name
+FROM 
+    product p
+JOIN 
+    product_category pc ON p.id = pc.product_id
+JOIN 
+    category c ON pc.cat_id = c.id;

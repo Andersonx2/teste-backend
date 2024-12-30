@@ -46,6 +46,7 @@ Abaixo, as solicitações do cliente:
 
   ### Categorias
     - [x] A categoria está vindo errada na listagem de produtos para alguns casos (_exemplo: produto `blue trouser` está vindo na categoria `phone` e deveria ser `clothing`_);
+
       
     - [x] Alguns produtos estão vindo com a categoria `null` ao serem pesquisados individualmente (_exemplo: produto `iphone 8`_); 
 
@@ -60,7 +61,7 @@ Abaixo, as solicitações do cliente:
     - [ ] Gostaria de poder ordenar os produtos por data de cadastro.
 
   ### Relatório
-    - [ ] O relatório não está mostrando a coluna de logs corretamente, se possível, gostaria de trazer no seguinte formato:
+    - [] O relatório não está mostrando a coluna de logs corretamente, se possível, gostaria de trazer no seguinte formato:
       (Nome do usuário, Tipo de alteração e Data),
       (Nome do usuário, Tipo de alteração e Data),
       (Nome do usuário, Tipo de alteração e Data)

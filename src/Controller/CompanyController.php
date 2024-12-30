@@ -31,4 +31,4 @@ class CompanyController
         $response->getBody()->write(json_encode($stm->fetch()));
         return $response->withStatus(200);
     }
-}
+} 
