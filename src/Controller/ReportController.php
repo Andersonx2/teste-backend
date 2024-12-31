@@ -18,6 +18,8 @@ class ReportController
         $this->companyService = new CompanyService();
     }
     
+
+
     public function generate(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $adminUserId = $request->getHeader('admin_user_id')[0];
@@ -55,24 +57,42 @@ class ReportController
             }
         
 
-            $productLogs = [];
-            if (isset($product->product_id)) {
-                $stm = $this->productService->getLog($product->product_id);
-                $productLogs = $stm->fetchAll(\PDO::FETCH_OBJ); 
+            $logsFormatted = []; // Array para armazenar os logs formatados
+            foreach ($productLogs as $log) {
+                // Chamando o método getUserNameById para obter o nome do usuário
+                $adminUserName = $this->getUserNameById($log->admin_user_id); 
+
+                // A data já está no formato correto
+                $timestamp = $log->timestamp;
+
+                // Tipo de alteração
+                $action = $log->action;
+
+                // Armazenando as informações formatadas no array
+                $logsFormatted[] = [
+                    'admin_user_name' => $adminUserName,
+                    'action' => $action,
+                    'timestamp' => $timestamp
+                ];
             }
-        
-            $data[$i+1][] = $product->product_id;  
+
+            // Substituindo os logs originais por logs formatados
+            $productLogs = $logsFormatted;
+        }
+
+            
+            $data[$i+1][] = $product->product_id;
             $data[$i+1][] = $companyName;
             $data[$i+1][] = $product->title;
             $data[$i+1][] = $product->price;
-            $data[$i+1][] = $product->category_name;  
+            $data[$i+1][] = $product->category_name;
             $data[$i+1][] = $product->created_at;
-            $data[$i+1][] = json_encode($productLogs); 
-         
-        }
+            
+            // Adicionando os logs formatados no array de dados
+            $data[$i+1][] = json_encode($productLogs);        
         
        
-
+    
         // Gerando a tabela em html 
         $report = "<table style='font-size: 10px;'>";
         foreach ($data as $row) {

@@ -57,8 +57,8 @@ class ProductService
         }
 
         $orderDir = strtoupper($orderDir);
-        if (!in_array($orderDir, ['ASC', 'DESC'], true)) {
-            $orderDir = $receivedOrderDir === 'ASC' ? 'ASC' : 'DESC'; 
+        if (!in_array($orderDir, ['DESC', 'ASC'], true)) {
+            $orderDir = $receivedOrderDir === 'DESC' ? 'DESC' : 'ASC'; 
         }
 
         $query .= " ORDER BY " . $orderBy . " " . $orderDir;    
