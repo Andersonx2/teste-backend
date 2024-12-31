@@ -13,8 +13,9 @@ class ProductService
     }
 
 
-    public function getAll($adminUserId, $status = null, $categoryTitle = null, $orderBy = 'created_at') 
+    public function getAll($adminUserId, $status = null, $categoryTitle = null, $orderDir = 'DESC', $orderBy = 'created_at')
     {
+        $receivedOrderDir = isset($_GET['orderDir']) ? $_GET['orderDir'] : 'Não definido';    
         $query = "
             SELECT 
                 p.id AS product_id, 
@@ -32,42 +33,48 @@ class ProductService
             JOIN 
                 category c ON pc.cat_id = c.id
         ";    
-
+    
         $conditions = [];
         $parameters = [];
-        
-        //Filtro de Status
+    
         if ($status !== null) {
             $conditions[] = "p.active = :status";
             $parameters[':status'] = $status;
         }
-        //Filtro de cagtegoria
+    
         if ($categoryTitle !== null) {
             $conditions[] = "c.title = :categoryTitle";
             $parameters[':categoryTitle'] = $categoryTitle;
         }
-        
+    
         if (!empty($conditions)) {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
-    
-    //Ordenação
-            $query .= " ORDER BY " . $orderBy;
 
-    $stm = $this->pdo->prepare($query);
+        $allowedOrderColumns = ['created_at', 'price', 'title'];      
+        if (!in_array($orderBy, $allowedOrderColumns)) {
+            $orderBy = 'created_at';  
+        }
+
+        $orderDir = strtoupper($orderDir);
+        if (!in_array($orderDir, ['ASC', 'DESC'], true)) {
+            $orderDir = $receivedOrderDir === 'ASC' ? 'ASC' : 'DESC'; 
+        }
+
+        $query .= " ORDER BY " . $orderBy . " " . $orderDir;    
+        $stm = $this->pdo->prepare($query);
+    
         foreach ($parameters as $param => $value) {
-        $stm->bindValue($param, $value);
+            $stm->bindValue($param, $value);
+        }
+
+        $stm->execute();
+        return $stm;
     }
     
-    $stm->execute();
-    
-    return $stm;
-}
-    
-  
+          
   public function getOne($id)
     {
-        // Prepara a consulta SQL para obter as informações do produto e suas categorias relacionadas
         $stm = $this->pdo->prepare("
             SELECT 
                 p.id AS product_id, 
@@ -86,30 +93,8 @@ class ProductService
             WHERE 
                 p.id = :id
         ");   
-
-        //Ordenacao dos produtos
-        $query .= " ORDER BY " . $orderBy;
-
-        //Filtro status
-        if ($status !== null) {
-            $query .= " AND p.active = :status";
-        }
-        //Filtro nome Categoria 
-        if ($categoryTitle !== null) {
-            $query .= " AND c.title = :categoryTitle";
-        }
-
-
-   // Bind dos parâmetros
-            if ($status !== null) {
-                $stm->bindValue(':status', $status, \PDO::PARAM_INT);
-            }
-            if ($categoryTitle !== null) {
-                $stm->bindValue(':categoryTitle', $categoryTitle, \PDO::PARAM_STR);
-            }
-
-            $stm->bindParam(':id', $id, \PDO::PARAM_INT);
         
+        $stm->bindParam(':id', $id, \PDO::PARAM_INT);       
         $stm->execute();
 
         $results = $stm->fetchAll(\PDO::FETCH_ASSOC);
@@ -126,7 +111,7 @@ class ProductService
             'created_at' => $results[0]['created_at'],
             'categories' => []
         ];
-    
+
         foreach ($results as $row) {
             $result['categories'][] = [
                 'name' => $row['category_name']

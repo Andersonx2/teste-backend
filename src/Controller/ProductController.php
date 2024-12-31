@@ -19,14 +19,34 @@ class ProductController
         $this->categoryService = new CategoryService();
     }
 
+
+    
+
     public function getAll(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $adminUserId = $request->getHeader('admin_user_id')[0];
+
+        // Obtendo os parâmetros da consulta
+        $queryParams = $request->getQueryParams();
+        $orderBy = $queryParams['order_by'] ?? 'created_at';
+        $orderDir = $queryParams['orderDir'] ?? 'ASC';
+
+        error_log("Captured order_by: $orderBy, Captured orderDir: $orderDir");
         
-        $stm = $this->service->getAll($adminUserId);
+        $status = $queryParams['status'] ?? null;
+        $categoryTitle = $queryParams['categoryId'] ?? null;
+
+
+        // Chamando o método getAll com os parâmetros filtrados
+        $stm = $this->service->getAll($adminUserId, $status, $categoryTitle, $orderBy, $orderDir );
+
+        // Retornando os resultados no formato JSON
         $response->getBody()->write(json_encode($stm->fetchAll()));
-        return $response->withStatus(200);
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
+
+
+
 
     public function getOne(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
