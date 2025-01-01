@@ -34,7 +34,7 @@ class ProductController
         error_log("Captured order_by: $orderBy, Captured orderDir: $orderDir");
         
         $status = $queryParams['status'] ?? null;
-        $categoryTitle = $queryParams['categoryId'] ?? null;
+        $categoryTitle = $queryParams['category'] ?? null;
 
 
         // Chamando o método getAll com os parâmetros filtrados
