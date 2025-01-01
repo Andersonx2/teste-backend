@@ -12,12 +12,14 @@ class CategoryService
         $this->pdo = DB::connect();
     }
 
-    public function getAll($adminUserId)
+    public function getAll($adminUserId,$categoryId)
     {
         $query = "
             SELECT *
             FROM category c
-            WHERE c.company_id = {$this->getCompanyFromAdminUser($adminUserId)}
+            WHERE c.active = 1
+            AND c.company_id = {$this->getCompanyFromAdminUser($adminUserId)}
+            AND c.id = {$categoryId}
         ";
 
         $stm = $this->pdo->prepare($query);

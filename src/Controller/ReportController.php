@@ -36,6 +36,7 @@ class ReportController
             'Logs de Alterações'
         ];
 
+        // Obtendo os produtos
         $stm = $this->productService->getAll(null, $status, $categoryTitle, 'DESC', $orderBy);
         $products = $stm->fetchAll(\PDO::FETCH_OBJ);
 
@@ -43,9 +44,12 @@ class ReportController
         
             $stm = $this->companyService->getNameById($product->company_id);
             $companyName = $stm->fetch(\PDO::FETCH_OBJ)->name;
+
+            // Obter logs do produto
             $stm = $this->productService->getLog($product->product_id);
             $productLogs = $stm->fetchAll(\PDO::FETCH_ASSOC);
 
+            // Verificar se os logs foram retornados
             $formattedLogs = [];
             if (!empty($productLogs)) {
                 foreach ($productLogs as $log) {
@@ -81,6 +85,7 @@ class ReportController
         }
         $report .= "</table>";
 
+        // Retornar resposta com relatório em HTML
         $response->getBody()->write($report);
         return $response->withStatus(200)->withHeader('Content-Type', 'text/html');    }
 }

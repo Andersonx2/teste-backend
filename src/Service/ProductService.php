@@ -12,10 +12,11 @@ class ProductService
         $this->pdo = DB::connect(); 
     }
 
-
     public function getAll($adminUserId, $status = null, $categoryTitle = null, $orderDir = 'DESC', $orderBy = 'created_at')
     {
-        $receivedOrderDir = isset($_GET['orderDir']) ? $_GET['orderDir'] : 'Não definido';    
+        // Verifica o valor de 'orderDir' vindo da URL
+        $receivedOrderDir = isset($_GET['orderDir']) ? $_GET['orderDir'] : 'Não definido';
+    
         $query = "
             SELECT 
                 p.id AS product_id, 
@@ -32,47 +33,112 @@ class ProductService
                 product_category pc ON p.id = pc.product_id
             JOIN 
                 category c ON pc.cat_id = c.id
-        ";    
+        ";
     
         $conditions = [];
         $parameters = [];
     
+        // Filtro por status
         if ($status !== null) {
             $conditions[] = "p.active = :status";
             $parameters[':status'] = $status;
         }
     
+        // Filtro por título da categoria
         if ($categoryTitle !== null) {
             $conditions[] = "c.title = :categoryTitle";
             $parameters[':categoryTitle'] = $categoryTitle;
         }
     
+        // Adiciona as condições à consulta
         if (!empty($conditions)) {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
-
-        $allowedOrderColumns = ['created_at', 'price', 'title'];      
+    
+        // Validação das colunas para ordenação
+        $allowedOrderColumns = ['created_at', 'price', 'title'];
         if (!in_array($orderBy, $allowedOrderColumns)) {
-            $orderBy = 'created_at';  
+            $orderBy = 'created_at';
         }
-
+    
+        // Validação da direção de ordenação
         $orderDir = strtoupper($orderDir);
         if (!in_array($orderDir, ['DESC', 'ASC'], true)) {
-            $orderDir = $receivedOrderDir === 'DESC' ? 'DESC' : 'ASC'; 
+            $orderDir = $receivedOrderDir === 'DESC' ? 'DESC' : 'ASC';
         }
-
-        $query .= " ORDER BY " . $orderBy . " " . $orderDir;    
+    
+        // Adiciona a ordenação à consulta
+        $query .= " ORDER BY " . $orderBy . " " . $orderDir;
+    
+        // Prepara a consulta SQL
         $stm = $this->pdo->prepare($query);
     
+        // Faz a ligação dos parâmetros da consulta
         foreach ($parameters as $param => $value) {
             $stm->bindValue($param, $value);
         }
-
+    
+        // Executa a consulta
         $stm->execute();
-        return $stm;
+    
+        // Obtém os resultados da consulta
+        $results = $stm->fetchAll(\PDO::FETCH_ASSOC);
+    
+        if (empty($results)) {
+            return [];
+        }
+    
+        $products = [];   
+        foreach ($results as $row) {
+            $productId = $row['product_id'];
+    
+            if (!isset($products[$productId])) {
+                $products[$productId] = [
+                    'id' => $productId,
+                    'title' => $row['title'],
+                    'company_id' => $row['company_id'],
+                    'price' => $row['price'],
+                    'active' => $row['active'],
+                    'created_at' => $row['created_at'],
+                    'categories' => []
+                ];
+            }
+    
+            $products[$productId]['categories'][] = [
+                // 'id' => $row['category_id'],
+                'name' => $row['category_name']
+            ];
+        }
+    
+        // Retorna os produtos com suas categorias
+        return array_values($products);
     }
     
-          
+    
+    public function getCategories($productId)
+    {
+        $stm = $this->pdo->prepare("
+            SELECT 
+                c.title AS name
+            FROM 
+                category c
+            JOIN 
+                product_category pc ON c.id = pc.cat_id
+            WHERE 
+                pc.product_id = :productId
+        ");
+        $stm->bindParam(':productId', $productId, \PDO::PARAM_INT);
+        $stm->execute();
+    
+        return $stm->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    
+
+
+
+
+
+
   public function getOne($id)
     {
         $stm = $this->pdo->prepare("
