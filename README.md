@@ -58,12 +58,12 @@ Abaixo, as solicitações do cliente:
     Para a listagem de produtos:
     - [x] Gostaria de poder filtrar os produtos ativos e inativos;
         http://localhost:8000/report?status=0
-    - [ ] Gostaria de poder filtrar os produtos por categoria;
+    - [x] Gostaria de poder filtrar os produtos por categoria;
     
-    - [ ] Gostaria de poder ordenar os produtos por data de cadastro.
+    - [x] Gostaria de poder ordenar os produtos por data de cadastro.
 
   ### Relatório
-    - [] O relatório não está mostrando a coluna de logs corretamente, se possível, gostaria de trazer no seguinte formato:
+    - [x] O relatório não está mostrando a coluna de logs corretamente, se possível, gostaria de trazer no seguinte formato:
       (Nome do usuário, Tipo de alteração e Data),
       (Nome do usuário, Tipo de alteração e Data),
       (Nome do usuário, Tipo de alteração e Data)
@@ -73,7 +73,7 @@ Abaixo, as solicitações do cliente:
       (Joe Doe, Remoção, 21/12/2023 14:52:50)
 
   ### Logs
-  - [ ] Gostaria de saber qual usuário mudou o preço do produto `iphone 8` por último.
+  - [ x] Gostaria de saber qual usuário mudou o preço do produto `iphone 8` por último.
 
   ### Extra
     - [ ] Aqui fica um desafio extra **opcional**: _criar um ambiente com_ Docker _para a api_.

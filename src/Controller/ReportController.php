@@ -11,19 +11,15 @@ class ReportController
 {
     private ProductService $productService;
     private CompanyService $companyService;
-    
+
     public function __construct()
     {
         $this->productService = new ProductService();
         $this->companyService = new CompanyService();
     }
-    
-
 
     public function generate(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $adminUserId = $request->getHeader('admin_user_id')[0];
-        
         $queryParams = $request->getQueryParams();
         $status = $queryParams['status'] ?? null;
         $categoryTitle = $queryParams['categoryId'] ?? null;
@@ -39,73 +35,52 @@ class ReportController
             'Data de Criação',
             'Logs de Alterações'
         ];
-        
 
+        $stm = $this->productService->getAll(null, $status, $categoryTitle, 'DESC', $orderBy);
+        $products = $stm->fetchAll(\PDO::FETCH_OBJ);
 
-    $stm = $this->productService->getAll($adminUserId, $status, $categoryTitle, $orderBy);
-    $products = $stm->fetchAll();       
-
-    
         foreach ($products as $i => $product) {
-            $companyName = '';
-            if (isset($product->company_id)) {
-                $stm = $this->companyService->getNameById($product->company_id);
-                $company = $stm->fetch();
-                if ($company) {
-                    $companyName = $company->name; 
-                }
-            }
         
+            $stm = $this->companyService->getNameById($product->company_id);
+            $companyName = $stm->fetch(\PDO::FETCH_OBJ)->name;
+            $stm = $this->productService->getLog($product->product_id);
+            $productLogs = $stm->fetchAll(\PDO::FETCH_ASSOC);
 
-            $logsFormatted = []; // Array para armazenar os logs formatados
-            foreach ($productLogs as $log) {
-                // Chamando o método getUserNameById para obter o nome do usuário
-                $adminUserName = $this->getUserNameById($log->admin_user_id); 
-
-                // A data já está no formato correto
-                $timestamp = $log->timestamp;
-
-                // Tipo de alteração
-                $action = $log->action;
-
-                // Armazenando as informações formatadas no array
-                $logsFormatted[] = [
-                    'admin_user_name' => $adminUserName,
-                    'action' => $action,
-                    'timestamp' => $timestamp
-                ];
+            $formattedLogs = [];
+            if (!empty($productLogs)) {
+                foreach ($productLogs as $log) {
+                    $formattedLogs[] = sprintf(
+                        "Usuário: %s, Ação: %s, Data: %s",
+                        $log['user_name'],
+                        $log['change_type'],
+                        $log['change_date']
+                    );
+                }
+            } else {
+                $formattedLogs[] = "Nenhum log disponível";
             }
 
-            // Substituindo os logs originais por logs formatados
-            $productLogs = $logsFormatted;
+            $data[] = [
+                $product->product_id,
+                $companyName,
+                $product->title,
+                $product->price,
+                $product->category_name,
+                $product->created_at,
+                implode("; ", $formattedLogs)
+            ];
         }
 
-            
-            $data[$i+1][] = $product->product_id;
-            $data[$i+1][] = $companyName;
-            $data[$i+1][] = $product->title;
-            $data[$i+1][] = $product->price;
-            $data[$i+1][] = $product->category_name;
-            $data[$i+1][] = $product->created_at;
-            
-            // Adicionando os logs formatados no array de dados
-            $data[$i+1][] = json_encode($productLogs);        
-        
-       
-    
-        // Gerando a tabela em html 
-        $report = "<table style='font-size: 10px;'>";
+        $report = "<table style='font-size: 10px; border-collapse: collapse;' border='1'>";
         foreach ($data as $row) {
             $report .= "<tr>";
             foreach ($row as $column) {
-                $report .= "<td>{$column}</td>";
+                $report .= "<td style='padding: 5px;'>" . htmlspecialchars($column, ENT_NOQUOTES, 'UTF-8') . "</td>";
             }
             $report .= "</tr>";
         }
         $report .= "</table>";
-        
-        // Retorna a resposta com o relatório em HTML
+
         $response->getBody()->write($report);
-        return $response->withStatus(200)->withHeader('Content-Type', 'text/html'); 
+        return $response->withStatus(200)->withHeader('Content-Type', 'text/html');    }
 }
-} 

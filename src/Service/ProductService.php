@@ -271,21 +271,38 @@ class ProductService
         return $stm->execute();
     }
 
-    public function getLog($id)
+    
+
+    public function getLog($productId)
     {
-        $stm = $this->pdo->prepare("
-            SELECT *
-            FROM product_log
-            WHERE product_id = :id
-        ");
+        $sql = "
+            SELECT 
+                pl.product_id,
+                p.title AS product_title,
+                au.name AS user_name,
+                au.email AS user_email,
+                pl.action AS change_type,
+                pl.timestamp AS change_date
+            FROM 
+                product_log pl
+            JOIN 
+                admin_user au ON pl.admin_user_id = au.id
+            JOIN 
+                product p ON pl.product_id = p.id
+            WHERE 
+                pl.product_id = :product_id
+            ORDER BY 
+                pl.timestamp DESC;
+        ";
+    
+        // Correção: usaremos $this->pdo em vez de $this->db e removemos o bindParam incorreto
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':product_id', $productId, \PDO::PARAM_INT);
+        $stmt->execute();
         
-        $stm->bindParam(':id', $id, \PDO::PARAM_INT);
-        $stm->execute();
-
-        return $stm;
+        return $stmt;
     }
-
-
+    
     
 }
 

@@ -17,9 +17,4 @@ class HomeController
         return $response->withStatus(200);
     }
     
-
-
-
-
-
 }
