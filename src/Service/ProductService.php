@@ -14,7 +14,6 @@ class ProductService
 
     public function getAll($adminUserId, $status = null, $categoryTitle = null, $orderDir = 'DESC', $orderBy = 'created_at')
     {
-        // Verifica o valor de 'orderDir' vindo da URL
         $receivedOrderDir = isset($_GET['orderDir']) ? $_GET['orderDir'] : 'Não definido';
     
         $query = "
@@ -38,50 +37,38 @@ class ProductService
         $conditions = [];
         $parameters = [];
     
-        // Filtro por status
         if ($status !== null) {
             $conditions[] = "p.active = :status";
             $parameters[':status'] = $status;
         }
     
-        // Filtro por título da categoria
         if ($categoryTitle !== null) {
             $conditions[] = "c.title = :categoryTitle";
             $parameters[':categoryTitle'] = $categoryTitle;
         }
     
-        // Adiciona as condições à consulta
         if (!empty($conditions)) {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
     
-        // Validação das colunas para ordenação
         $allowedOrderColumns = ['created_at', 'price', 'title'];
         if (!in_array($orderBy, $allowedOrderColumns)) {
             $orderBy = 'created_at';
         }
     
-        // Validação da direção de ordenação
         $orderDir = strtoupper($orderDir);
         if (!in_array($orderDir, ['DESC', 'ASC'], true)) {
             $orderDir = $receivedOrderDir === 'DESC' ? 'DESC' : 'ASC';
         }
     
-        // Adiciona a ordenação à consulta
         $query .= " ORDER BY " . $orderBy . " " . $orderDir;
-    
-        // Prepara a consulta SQL
         $stm = $this->pdo->prepare($query);
     
-        // Faz a ligação dos parâmetros da consulta
         foreach ($parameters as $param => $value) {
             $stm->bindValue($param, $value);
         }
     
-        // Executa a consulta
         $stm->execute();
-    
-        // Obtém os resultados da consulta
         $results = $stm->fetchAll(\PDO::FETCH_ASSOC);
     
         if (empty($results)) {
@@ -110,7 +97,6 @@ class ProductService
             ];
         }
     
-        // Retorna os produtos com suas categorias
         return array_values($products);
     }
     
@@ -132,15 +118,9 @@ class ProductService
     
         return $stm->fetchAll(\PDO::FETCH_ASSOC);
     }
-    
 
-
-
-
-
-
-  public function getOne($id)
-    {
+    public function getOne($id)
+     {
         $stm = $this->pdo->prepare("
             SELECT 
                 p.id AS product_id, 
@@ -361,7 +341,6 @@ class ProductService
                 pl.timestamp DESC;
         ";
     
-        // Correção: usaremos $this->pdo em vez de $this->db e removemos o bindParam incorreto
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':product_id', $productId, \PDO::PARAM_INT);
         $stmt->execute();
