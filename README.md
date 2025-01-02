@@ -58,7 +58,7 @@ Abaixo, as solicitações do cliente:
     - [x] Gostaria de poder filtrar os produtos por categoria;
         http://localhost:8000/products?category=phone
 
-    - [] Gostaria de poder ordenar os produtos por data de cadastro.
+    - [x] Gostaria de poder ordenar os produtos por data de cadastro.
         http://localhost:8000/products?orderDir=DESC
         http://localhost:8000/products?orderDir=ASC
         
