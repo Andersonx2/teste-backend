@@ -47,20 +47,21 @@ Abaixo, as solicitações do cliente:
   ### Categorias
     - [x] A categoria está vindo errada na listagem de produtos para alguns casos (_exemplo: produto `blue trouser` está vindo na categoria `phone` e deveria ser `clothing`_);
 
-      
     - [x] Alguns produtos estão vindo com a categoria `null` ao serem pesquisados individualmente (_exemplo: produto `iphone 8`_); 
 
     - [x] Cadastrei o produto `king size bed` em mais de uma categoria, mas ele aparece **apenas** na categoria `furniture` na busca individual do produto.
 
-
-
   ### Filtros e Ordenamento
     Para a listagem de produtos:
     - [x] Gostaria de poder filtrar os produtos ativos e inativos;
-        http://localhost:8000/report?status=0
+        http://localhost:8000/products?status=0
     - [x] Gostaria de poder filtrar os produtos por categoria;
-    
-    - [x] Gostaria de poder ordenar os produtos por data de cadastro.
+        http://localhost:8000/products?category=phone
+
+    - [] Gostaria de poder ordenar os produtos por data de cadastro.
+        http://localhost:8000/products?orderDir=DESC
+        http://localhost:8000/products?orderDir=ASC
+        
 
   ### Relatório
     - [x] O relatório não está mostrando a coluna de logs corretamente, se possível, gostaria de trazer no seguinte formato:
@@ -70,10 +71,17 @@ Abaixo, as solicitações do cliente:
       Exemplo:
       (John Doe, Criação, 01/12/2023 12:50:30),
       (Jane Doe, Atualização, 11/12/2023 13:51:40),
-      (Joe Doe, Remoção, 21/12/2023 14:52:50)
+      (Joe Doe, Remoção, 21/12/2023 14:52:50) 
+
+      Fiz uma pequena alteracao na organizacao dos dados colocando: 
+      Data | Nome do usuario | Tipo de alteração 
+      http://localhost:8000/report
+
+
 
   ### Logs
-  - [ x] Gostaria de saber qual usuário mudou o preço do produto `iphone 8` por último.
+  - [x] Gostaria de saber qual usuário mudou o preço do produto `iphone 8` por último.
+       Adicionar filtro por nome do produto no report
 
   ### Extra
     - [ ] Aqui fica um desafio extra **opcional**: _criar um ambiente com_ Docker _para a api_.
@@ -81,6 +89,8 @@ Abaixo, as solicitações do cliente:
 **Seu trabalho é atender às 7 demandas solicitadas pelo cliente.**
 
 Caso julgue necessário, podem ser adicionadas ou modificadas as rotas da api. Caso altere, por favor, explique o porquê e indique as alterações nesse `README`.
+
+
 
 Sinta-se a vontade para refatorar o que achar pertinente, considerando questões como arquitetura, padrões de código, padrões restful, _segurança_ e quaisquer outras boas práticas. Levaremos em conta essas mudanças.
 

@@ -37,40 +37,37 @@ class ReportController
         ];
 
         // Obtendo os produtos
-        $stm = $this->productService->getAll(null, $status, $categoryTitle, 'DESC', $orderBy);
-        $products = $stm->fetchAll(\PDO::FETCH_OBJ);
+        $products = $this->productService->getAll(null, $status, $categoryTitle, 'DESC', $orderBy);;
 
-        foreach ($products as $i => $product) {
+        foreach ($products as $product) {
+            $companyName = $this->companyService->getNameById($product['company_id'])->fetch(\PDO::FETCH_OBJ)->name;
         
-            $stm = $this->companyService->getNameById($product->company_id);
-            $companyName = $stm->fetch(\PDO::FETCH_OBJ)->name;
-
             // Obter logs do produto
-            $stm = $this->productService->getLog($product->product_id);
+            $stm = $this->productService->getLog($product['id']);
             $productLogs = $stm->fetchAll(\PDO::FETCH_ASSOC);
-
+        
             // Verificar se os logs foram retornados
             $formattedLogs = [];
             if (!empty($productLogs)) {
                 foreach ($productLogs as $log) {
                     $formattedLogs[] = sprintf(
-                        "Usuário: %s, Ação: %s, Data: %s",
+                        "%s, %s, %s",
+                        $log['change_date'],
                         $log['user_name'],
-                        $log['change_type'],
-                        $log['change_date']
+                        $log['change_type']
                     );
                 }
             } else {
                 $formattedLogs[] = "Nenhum log disponível";
             }
-
+        
             $data[] = [
-                $product->product_id,
+                $product['id'],
                 $companyName,
-                $product->title,
-                $product->price,
-                $product->category_name,
-                $product->created_at,
+                $product['title'],
+                $product['price'],
+                implode(", ", array_column($product['categories'], 'name')),
+                $product['created_at'],
                 implode("; ", $formattedLogs)
             ];
         }
